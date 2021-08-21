@@ -31,4 +31,14 @@ defmodule WSurvey.WuhanSurveyControllerTest do
     assert json_response(conn, 200) == %{"count" => %{"agree" => 0, "disagree" => 0, "total" => 0}}
   end
 
+  test "voting displays correct count", %{conn: conn} do
+    fixture(:w_survey)
+    conn =
+      conn
+      |> post(Routes.wuhan_survey_path(conn, :wuhan_vote), vote: "agree")
+      |> get(Routes.wuhan_survey_path(conn, :wuhan_count))
+
+    assert json_response(conn, 200) == %{"count" => %{"agree" => 1, "disagree" => 0, "total" => 1}}
+  end
+
 end
