@@ -3,15 +3,23 @@ defmodule WSurveyWeb.Router do
   import WSurveyWeb.RateLimiter
 
   pipeline :api do
-    plug :accepts, ["json"]
-    plug :rate_limit, max_requests: 60, interval_seconds: 60
+    plug(:accepts, ["json"])
+    plug(:rate_limit, max_requests: 60, interval_seconds: 60)
   end
 
-  scope "/api", WSurveyWeb do
-    pipe_through :api
+  scope "/api" do
+    pipe_through(:api)
 
-    get "/count", WuhanSurveyController, :wuhan_count
-    post "/vote", WuhanSurveyController, :wuhan_vote
+    get("/count", WSurveyWeb.WuhanSurveyController, :wuhan_count)
+    post("/vote", WSurveyWeb.WuhanSurveyController, :wuhan_vote)
+
+    forward "/graphql", Absinthe.Plug, schema: WSurveyWeb.Schema
+
+    forward("/graphiql", Absinthe.Plug.GraphiQL,
+      schema: WSurveyWeb.Schema,
+      interface: :playground,
+      context: %{pubsub: WSurveyWeb.Endpoint}
+    )
   end
 
   # Enables LiveDashboard only for development
@@ -25,8 +33,8 @@ defmodule WSurveyWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through [:fetch_session, :protect_from_forgery]
-      live_dashboard "/dashboard", metrics: WSurveyWeb.Telemetry
+      pipe_through([:fetch_session, :protect_from_forgery])
+      live_dashboard("/dashboard", metrics: WSurveyWeb.Telemetry)
     end
   end
 end
