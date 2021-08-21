@@ -13,7 +13,7 @@ defmodule WSurveyWeb.WuhanSurveyController do
   end
 
   def wuhan_count(conn, _) do
-    count = WuhanSurvey.wuhan_count()
+    {:ok, count} = WuhanSurvey.wuhan_count()
     render(conn, "count.json", count: count)
   end
 end
